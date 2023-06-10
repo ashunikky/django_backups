@@ -25,6 +25,7 @@ class Restore(models.Model):
 
     type = models.CharField(max_length=10, choices=RESTORE_TYPE_CHOICES)
     restored_at = models.DateTimeField(auto_now_add=True)
+    file = models.FileField(upload_to='backups/')
     restored_by = models.ForeignKey(User, on_delete=models.PROTECT)
 
     def __str__(self):
