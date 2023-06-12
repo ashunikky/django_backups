@@ -1,8 +1,7 @@
-from django.conf import settings
 from django.contrib import admin
 from django.utils.html import format_html
 
-from backups.db_connectors import SqliteConnector, PostgresConnector, get_db_connector
+from backups.db_connectors import get_db_connector
 from backups.models import Backup, Restore
 
 
@@ -40,23 +39,14 @@ class RestoreBackupAdmin(admin.ModelAdmin):
     readonly_fields = ['restored_at', 'restored_by']
 
     def save_model(self, request, obj, form, change):
-        database_engine = settings.DATABASES['default']['ENGINE']
-
-        # Create a backup based on the database type
-        if 'sqlite3' in database_engine:
-            connector = SqliteConnector()
-        elif 'postgresql' in database_engine:
-            connector = PostgresConnector()
-        else:
-            print(f"Database type '{database_engine}' is not supported for backup.")
-            return
-
         # Associate the backup with the saved model instance
         obj.restored_by = request.user
         obj.save()
+        if obj.type == 'database':
+            connector = get_db_connector()
 
-        # Restore the backup file
-        connector.restore_backup(obj.file)
+            # Restore the backup file
+            connector.restore_backup(obj.file)
 
     def has_change_permission(self, request, obj=None):
         return False
