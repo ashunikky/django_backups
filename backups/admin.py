@@ -2,7 +2,9 @@ from django.contrib import admin
 from django.utils.html import format_html
 
 from backups.db_connectors import get_db_connector
+from backups.media_manager import compress_media_file
 from backups.models import Backup, Restore
+from django.conf import settings
 
 
 @admin.register(Backup)
@@ -22,8 +24,14 @@ class BackupBackupAdmin(admin.ModelAdmin):
             connector = get_db_connector()
             #  Create the backup file
             backup_file_path = connector.create_backup()
+            
             # Associate the backup with the saved model instance
             obj.file.name = backup_file_path
+        else:
+            
+            backup_file_path = compress_media_file()
+            
+            obj.file.name= backup_file_path
 
         obj.created_by = request.user
         obj.save()

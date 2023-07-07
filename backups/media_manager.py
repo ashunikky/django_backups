@@ -1,24 +1,32 @@
 import os
 import shutil
-import zipfile
 from django.conf import settings
 
 
-class MediaBackupManager:
-    def __init__(self):
-        self.media_root = settings.MEDIA_ROOT
+def compress_media_file():
+    # Get the file name and extension
+    parent_dir= os.path.join(settings.MEDIA_ROOT,'backups')
+    new_path=os.path.join(settings.MEDIA_ROOT,'media_backup')
 
-    def backup(self, zip_path):
-        try:
-            shutil.make_archive(zip_path, 'zip', self.media_root)
-            print(f'Media backup created successfully: {zip_path}.zip')
-        except Exception as e:
-            print(f'Error creating media backup: {e}')
+    if os.path.exists(new_path):
+        print("File already exists!! plz 'rename' or 'delete' the existing one first")
+    else:
+        shutil.make_archive(new_path, 'zip', parent_dir)
+        
+        # shutil.rmtree(parent_dir)
+        basename2=os.path.basename(new_path)
+        dir_name= ".zip"
+        new_dir_name2= basename2+dir_name
+        new_path2 = os.path.join(new_path, new_dir_name2)
+        if os.path.exists(new_path2):
+            print("ZIP folder created")
+        else:
+            print("ZIP folder not created")
+        
+    return relative_file_path(new_path2)
 
-    def restore(self, zip_file):
-        try:
-            with zipfile.ZipFile(zip_file, 'r') as zip_ref:
-                zip_ref.extractall(self.media_root)
-            print('Media backup restored successfully!')
-        except Exception as e:
-            print(f'Error restoring media backup: {e}')
+def relative_file_path(new_path2):
+    
+    relative_path = os.path.basename(new_path2)
+    return relative_path
+  
