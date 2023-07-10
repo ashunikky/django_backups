@@ -1,5 +1,6 @@
 import os
 import shutil
+from zipfile import ZipFile
 from django.conf import settings
 
 
@@ -30,3 +31,16 @@ def relative_file_path(new_path2):
     relative_path = os.path.basename(new_path2)
     return relative_path
   
+def restore_media_file():
+    parent_dir= os.path.join(settings.MEDIA_ROOT,'media_backup.zip')
+    print(parent_dir)
+    if os.path.exists(parent_dir):
+            with ZipFile(parent_dir, 'r') as zObject:
+                dir_name= os.path.dirname(parent_dir)
+                new_path = os.path.join(dir_name,'restored_media')
+                zObject.extractall(new_path)
+                # os.remove(parent_dir)
+                print("file uncompressed successfully ")
+                return new_path
+    else:
+            print("please give path to ZIP file")

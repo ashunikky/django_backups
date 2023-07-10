@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 
 from backups.db_connectors import get_db_connector
-from backups.media_manager import compress_media_file
+from backups.media_manager import compress_media_file, restore_media_file
 from backups.models import Backup, Restore
 from django.conf import settings
 
@@ -49,12 +49,17 @@ class RestoreBackupAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         # Associate the backup with the saved model instance
         obj.restored_by = request.user
-        obj.save()
+        
         if obj.type == 'database':
             connector = get_db_connector()
 
             # Restore the backup file
             connector.restore_backup(obj.file)
+        else:
+            connector= restore_media_file()
+            obj.file = connector
+        obj.save()    
+
 
     def has_change_permission(self, request, obj=None):
         return False
